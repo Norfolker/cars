@@ -1,6 +1,6 @@
 public class Seller {
 
-    protected static int carsSum = 6;
+    protected static int carsSum = 4;
     protected static int target = 10;
     protected static long sellTime = 600L;
     protected static long putTime = 200L;
@@ -13,33 +13,40 @@ public class Seller {
     }
 
     public synchronized void getCar() {
-        if (salesCount < target) {
+        while (salesCount < target) {
+            System.out.println("Покупатель " + Thread.currentThread().getName() + " зашел в автосалон");
             try {
-                System.out.println("Покупатель " + Thread.currentThread().getName() + " зашел в автосалон");
-                while (carsSum == 0) {
+                if (carsSum < 1) {
                     System.out.println("Машин нет");
                     wait();
+                    notify();
+                } else {
+                    salesCount++;
+                    carsSum--;
+                    System.out.println("Продан " + salesCount + "й автомобиль");
+                    System.out.println("Атомобилей в салоне: " + carsSum);
+                    Thread.sleep(sellTime);
                 }
-                carsSum--;
-                salesCount++;
-                Thread.sleep(sellTime);
-                System.out.println("Продан " + salesCount + "й автомобиль");
-                System.out.println("Атомобилей в салоне: " + carsSum);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
         }
+        Thread.currentThread().isInterrupted();
     }
 
     public synchronized void putCar() {
-        try {
-            Thread.sleep(putTime);
-            carsSum++;
-            System.out.println("Производитель " + Thread.currentThread().getName() + " добавил 1 автомобиль");
-            System.out.println("Атомобилей в салоне: " + carsSum);
-            notify();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+        while (salesCount < target) {
+            try {
+                Thread.sleep(putTime);
+                carsSum++;
+                System.out.println("Производитель " + Thread.currentThread().getName() + " добавил 1 автомобиль");
+                System.out.println("Атомобилей в салоне: " + carsSum);
+                notify();
+                wait();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         }
+        Thread.currentThread().interrupt();
     }
 }
