@@ -1,10 +1,10 @@
 public class Seller {
 
-    protected static int carsSum = 4;
-    protected static int target = 10;
-    protected static long sellTime = 600L;
-    protected static long putTime = 200L;
+    protected static final int target = 10;
+    protected static final long sellTime = 300L;
+    protected static final long putTime = 900L;
     protected static int salesCount = 0;
+    protected static int carsSum = 0;
 
     private Store store;
 
@@ -19,7 +19,6 @@ public class Seller {
                 if (carsSum < 1) {
                     System.out.println("Машин нет");
                     wait();
-                    notify();
                 } else {
                     salesCount++;
                     carsSum--;
@@ -35,14 +34,13 @@ public class Seller {
     }
 
     public synchronized void putCar() {
-        while (salesCount < target) {
+        while (carsSum < (target - salesCount)) {
             try {
                 Thread.sleep(putTime);
                 carsSum++;
                 System.out.println("Производитель " + Thread.currentThread().getName() + " добавил 1 автомобиль");
                 System.out.println("Атомобилей в салоне: " + carsSum);
-                notify();
-                wait();
+                notifyAll();
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
